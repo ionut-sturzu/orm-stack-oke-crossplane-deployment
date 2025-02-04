@@ -104,9 +104,45 @@ terraform apply
 
 # Deploy resources using Crossplane OCI provider
 After the deployment is completed go to outputs and get the ssh command to be able to login into the operator instance where the Crossplane OCI provider has been installed.
-To create resources in OCI you can look at the examples from here: https://github.com/oracle-samples/crossplane-provider-oci/tree/main/examples 
-Create an .yaml file with the content for the resource that you want to deploy it and just run k apply -f name_of_file.yaml
-The resource will be created and you can see it the provider logs located in /home/opc/make_run.log
+1. Retrieve the SSH command from the deployment outputs to log in to the operator instance where the Crossplane OCI Provider has been installed.
+```
+ssh -i <your-ssh-key> opc@<operator-instance-ip>
+```
+Verify that Crossplane is installed and running correctly on the instance:
+```
+kubectl get pods -n crossplane-system
+```
+To create resources in OCI using Crossplane, refer to the example configurations provided in the official repository:
+Crossplane OCI Examples[https://github.com/oracle-samples/crossplane-provider-oci/tree/main/examples]
+
+Create a YAML file with the specifications of the OCI resource you want to provision. For example, to create an OCI bucket, create a file named oci-bucket.yaml:
+```
+apiVersion: storage.oci.crossplane.io/v1alpha1
+kind: Bucket
+metadata:
+  name: example-bucket
+spec:
+  forProvider:
+    compartmentId: <your-compartment-ocid>
+    name: my-crossplane-bucket
+    namespace: <your-namespace>
+  providerConfigRef:
+    name: default
+```
+Apply the configuration to deploy the resource:
+```
+kubectl apply -f oci-bucket.yaml
+```
+Monitor the status of the resource creation and provider logs:
+```
+kubectl get managed
+tail -f /home/opc/make_run.log
+```
+Troubleshooting & Logs
+
+If any issues arise during deployment or resource creation, check the provider logs located at: /home/opc/make_run.log
+Additionally, ensure that all dependencies and required credentials are correctly configured in Crossplane.
+
 
 ## Known Issues
 - No Known Issues
