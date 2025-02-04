@@ -1,0 +1,34 @@
+# ORM injected values
+
+tenancy_ocid         = "ocid1.tenancy.oc1.."            # Get this from OCI Console (after logging in, go to top-right-most menu item and click option "Tenancy: <your tenancy name>").
+user_ocid            = "ocid1.user.oc1.."               # Get this from OCI Console (after logging in, go to top-right-most menu item and click option "My profile").
+fingerprint          = "4d:d3:13.."     # The fingerprint can be gathered from your user account. In the "My profile page, click "API keys" on the menu in left hand side.
+private_key_path     = "" # This is the full path on your local system to the API signing private key.
+private_key_password = ""                          # This is the password that protects the private key, if any.
+region               = ""  
+
+
+compartment_ocid  = "ocid1.compartment.oc1.."
+
+# OKE Terraform module values
+create_iam_resources     = false
+create_iam_tag_namespace = false
+ssh_public_key           = ""
+
+## NodePool with non-GPU shape is created by default with size 1
+simple_np_flex_shape   = { "instanceShape" = "VM.Standard.E4.Flex", "ocpus" = 2, "memory" = 12 }
+
+## NodePool with GPU shape is created by default with size 0
+gpu_np_size  = 0
+gpu_np_shape = "VM.GPU.A10.1"
+
+## OKE Deployment values
+cluster_name           = "oke"
+vcn_name               = "oke-vcncrossplane"
+compartment_id         = "ocid1.compartment.oc1.."
+
+#OCIR & Crossplane login values
+registry_display_name  = "tfcrossplane"
+ocir_auth_token = ""
+ocir_username = ""
+private_key_content = ""
