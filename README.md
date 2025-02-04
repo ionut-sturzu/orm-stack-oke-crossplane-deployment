@@ -113,7 +113,7 @@ Verify that Crossplane is installed and running correctly on the instance:
 kubectl get pods -n crossplane-system
 ```
 To create resources in OCI using Crossplane, refer to the example configurations provided in the official repository:
-Crossplane OCI Examples[https://github.com/oracle-samples/crossplane-provider-oci/tree/main/examples]
+[Crossplane OCI Examples](https://github.com/oracle-samples/crossplane-provider-oci/tree/main/examples)
 
 Create a YAML file with the specifications of the OCI resource you want to provision. For example, to create an OCI bucket, create a file named oci-bucket.yaml:
 ```
@@ -135,7 +135,6 @@ kubectl apply -f oci-bucket.yaml
 ```
 Monitor the status of the resource creation and provider logs:
 ```
-kubectl get managed
 tail -f /home/opc/make_run.log
 ```
 Troubleshooting & Logs
