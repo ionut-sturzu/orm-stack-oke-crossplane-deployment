@@ -37,7 +37,7 @@ jobs:
             zip -r "${d%/}.zip" "$d"
           done
       - name: Upload ZIP Files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zipped-folders
           path: "*.zip"
