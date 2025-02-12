@@ -29,16 +29,18 @@ jobs:
       - name: Run a one-line script
         run: echo Hello, world!
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
       - name: Zip Each Folder
         run: |
           for d in */ ; do
-            zip -r "${d%/}.zip" "$d"
+            folder_name="${d%/}"
+            zip -r "$folder_name.zip" "$d"
+            mv "$folder_name.zip" /tmp/
           done
-      - name: Upload ZIP Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: zipped-folders
-          path: "*.zip"
+
+      - name: Upload Each Folder as Artifact
+        run: |
+          for zip_file in /tmp/*.zip; do
+            folder_name=$(basename "$zip_file" .zip)
+            gh artifact upload --name "$folder_name" "$zip_file"
+          done
   
