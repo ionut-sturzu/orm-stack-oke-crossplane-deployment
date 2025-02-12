@@ -1,22 +1,9 @@
 # Copyright (c) 2022, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl
 
-# locals {
-#   ads_supporting_gpu_shape = [for key, value in data.oci_core_shapes.gpu_shapes : key if length(value.shapes) > 0]
-#   gpu_np_placement_ads = (
-#     length(var.gpu_np_placement_ads) > 0 ?
-#     [for entry in var.gpu_np_placement_ads : length(tostring(entry)) > 1 ? substr(tostring(entry), -1, -1) : tonumber(entry)] :
-#     [for entry in local.ads_supporting_gpu_shape : substr(tostring(entry), -1, -1)]
-#   )
-# }
-
 # The OKE module documentation is available here: https://oracle-terraform-modules.github.io/terraform-oci-oke/
 module "oke" {
   source = "git::https://github.com/robo-cap/terraform-oci-oke.git?ref=v5.1.8-ai"
-  # source = "./../new/terraform-oci-oke"
-
-  #  source  = "oracle-terraform-modules/oke/oci"
-  #  version = "5.1.8"
 
   providers = {
     oci.home = oci.home
@@ -84,7 +71,6 @@ module "oke" {
     pub_lb   = { cidr = var.cidr_pub_lb_subnet }
     workers  = { cidr = var.cidr_workers_subnet }
     pods     = { cidr = var.cidr_pods_subnet }
-    # fss      = { cidr = var.cidr_fss_subnet }
   }
 
   nsgs = {
@@ -95,17 +81,9 @@ module "oke" {
     pub_lb   = {}
     workers  = {}
     pods     = {}
-    # fss      = {}
   }
 
-  nat_gateway_route_rules = [
-    # {
-    #   destination       = "192.168.0.0/16"
-    #   destination_type  = "CIDR_BLOCK"
-    #   network_entity_id = "drg"
-    #   description       = "Terraformed - 192/16 to DRG"
-    # },
-  ]
+  nat_gateway_route_rules = []
 
   # Cluster variables
   create_cluster                    = var.create_cluster // *true/false
@@ -141,18 +119,7 @@ module "oke" {
       ocpus            = lookup(var.simple_np_flex_shape, "ocpus", 2),
       memory           = lookup(var.simple_np_flex_shape, "memory", 16)
       boot_volume_size = var.simple_np_boot_volume_size
-    },
-    # gpu-np = {
-    #   description      = "Worker nodes with GPU for the OKE cluster.",
-    #   size             = var.gpu_np_size,
-    #   os               = "Oracle Linux",
-    #   os_version       = "8",
-    #   image_type       = "oke",
-    #   image_id         = "ocid1.image...",
-    #   shape            = var.gpu_np_shape,
-    #   boot_volume_size = var.gpu_np_boot_volume_size
-    #   placement_ads    = local.gpu_np_placement_ads
-    # }
+    }
   }
 
   output_detail = true
@@ -169,10 +136,3 @@ output "operator" {
 output "ssh_to_operator" {
   value = "%{if var.create_operator_and_bastion}${module.oke.ssh_to_operator}%{else}bastion and operator hosts not created.%{endif}"
 }
-
-# output "jupyter_hub_url" {
-#   value = (var.deploy_nginx && var.deploy_jupyterhub && length(coalesce(data.oci_load_balancer_load_balancers.lbs.load_balancers, [])) > 0 ?
-#     "https://jupyter.${data.oci_load_balancer_load_balancers.lbs.load_balancers[0].ip_addresses[0]}.nip.io" :
-#     ""
-#   )
-# }

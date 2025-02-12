@@ -213,11 +213,8 @@ module "crossplane" {
     # la fel si aici in legatura cu user si parola + namespace
     "kubectl create secret docker-registry ocirauth --namespace default --docker-server=${lower(data.oci_identity_region_subscriptions.test_region_subscriptions.region_subscriptions[0].region_key)}.ocir.io --docker-username='${var.ocir_username}' --docker-password='${var.ocir_auth_token}'",
   ]
-  #230 namespace, 260-270 provider details think about when running from ORM,
 
-  deployment_extra_args = [
-    # "--set service.name=alphafold2"
-  ]
+  deployment_extra_args = []
   post_deployment_commands = [
   <<-EOF
     cat <<YAML | tee ~/crossplane_yamls/provider.yaml
