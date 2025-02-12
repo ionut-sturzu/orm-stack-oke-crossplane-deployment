@@ -13,140 +13,6 @@ data "oci_containerengine_cluster_kube_config" "kube_config" {
   endpoint   = "PUBLIC_ENDPOINT"
 }
 
-# module "nginx" {
-#   count  = var.deploy_nginx ? 1 : 0
-#   source = "./helm-module"
-
-#   bastion_host    = module.oke.bastion_public_ip
-#   bastion_user    = var.bastion_user
-#   operator_host   = module.oke.operator_private_ip
-#   operator_user   = var.bastion_user
-#   ssh_private_key = tls_private_key.stack_key.private_key_openssh
-
-#   deploy_from_operator = local.deploy_from_operator
-#   deploy_from_local    = local.deploy_from_local
-
-#   deployment_name     = "ingress-nginx"
-#   helm_chart_name     = "ingress-nginx"
-#   namespace           = "nginx"
-#   helm_repository_url = "https://kubernetes.github.io/ingress-nginx"
-
-#   pre_deployment_commands  = []
-#   post_deployment_commands = []
-
-#   helm_template_values_override = templatefile(
-#     "${path.root}/helm-values-templates/nginx-values.yaml.tpl",
-#     {
-#       min_bw        = 100,
-#       max_bw        = 100,
-#       pub_lb_nsg_id = module.oke.pub_lb_nsg_id
-#       state_id      = local.state_id
-#     }
-#   )
-#   helm_user_values_override = try(base64decode(var.nginx_user_values_override), var.nginx_user_values_override)
-
-#   kube_config = one(data.oci_containerengine_cluster_kube_config.kube_config.*.content)
-#   depends_on  = [module.oke]
-# }
-
-
-# module "cert-manager" {
-#   count  = var.deploy_cert_manager ? 1 : 0
-#   source = "./helm-module"
-
-#   bastion_host    = module.oke.bastion_public_ip
-#   bastion_user    = var.bastion_user
-#   operator_host   = module.oke.operator_private_ip
-#   operator_user   = var.bastion_user
-#   ssh_private_key = tls_private_key.stack_key.private_key_openssh
-
-#   deploy_from_operator = local.deploy_from_operator
-#   deploy_from_local    = local.deploy_from_local
-
-#   deployment_name     = "cert-manager"
-#   helm_chart_name     = "cert-manager"
-#   namespace           = "cert-manager"
-#   helm_repository_url = "https://charts.jetstack.io"
-
-#   pre_deployment_commands = []
-#   post_deployment_commands = [
-#     "cat <<'EOF' | kubectl apply -f -",
-#     "apiVersion: cert-manager.io/v1",
-#     "kind: ClusterIssuer",
-#     "metadata:",
-#     "  name: le-clusterissuer",
-#     "spec:",
-#     "  acme:",
-#     "    # You must replace this email address with your own.",
-#     "    # Let's Encrypt will use this to contact you about expiring",
-#     "    # certificates, and issues related to your account.",
-#     "    email: user@oracle.com",
-#     "    server: https://acme-staging-v02.api.letsencrypt.org/directory",
-#     "    privateKeySecretRef:",
-#     "      # Secret resource that will be used to store the account's private key.",
-#     "      name: le-clusterissuer-secret",
-#     "    # Add a single challenge solver, HTTP01 using nginx",
-#     "    solvers:",
-#     "    - http01:",
-#     "        ingress:",
-#     "          ingressClassName: nginx",
-#     "EOF"
-#   ]
-
-#   helm_template_values_override = templatefile(
-#     "${path.root}/helm-values-templates/cert-manager-values.yaml.tpl",
-#     {}
-#   )
-#   helm_user_values_override = try(base64decode(var.cert_manager_user_values_override), var.cert_manager_user_values_override)
-
-#   kube_config = one(data.oci_containerengine_cluster_kube_config.kube_config.*.content)
-
-#   depends_on = [module.oke]
-# }
-
-
-# module "jupyterhub" {
-#   count  = var.deploy_jupyterhub ? 1 : 0
-#   source = "./helm-module"
-
-#   bastion_host    = module.oke.bastion_public_ip
-#   bastion_user    = var.bastion_user
-#   operator_host   = module.oke.operator_private_ip
-#   operator_user   = var.bastion_user
-#   ssh_private_key = tls_private_key.stack_key.private_key_openssh
-
-#   deploy_from_operator = local.deploy_from_operator
-#   deploy_from_local    = local.deploy_from_local
-
-#   deployment_name     = "jupyterhub"
-#   helm_chart_name     = "jupyterhub"
-#   namespace           = "default"
-#   helm_repository_url = "https://hub.jupyter.org/helm-chart/"
-
-#   pre_deployment_commands = ["export PUBLIC_IP=$(kubectl get svc -A -l app.kubernetes.io/name=ingress-nginx  -o json | jq -r '.items[] | select(.spec.type == \"LoadBalancer\") | .status.loadBalancer.ingress[].ip')"]
-#   deployment_extra_args = [
-#     "--set ingress.hosts[0]=jupyter.$${PUBLIC_IP}.nip.io",
-#     "--set ingress.tls[0].hosts[0]=jupyter.$${PUBLIC_IP}.nip.io",
-#     "--set ingress.tls[0].secretName=jupyter-tls"
-#   ]
-#   post_deployment_commands = []
-
-#   helm_template_values_override = templatefile(
-#     "${path.root}/helm-values-templates/jupyterhub-values.yaml.tpl",
-#     {
-#       admin_user     = var.jupyter_admin_user
-#       admin_password = var.jupyter_admin_password
-#       playbooks_repo = var.jupyter_playbooks_repo
-#     }
-#   )
-#   helm_user_values_override = try(base64decode(var.jupyterhub_user_values_override), var.jupyterhub_user_values_override)
-
-#   kube_config = one(data.oci_containerengine_cluster_kube_config.kube_config.*.content)
-
-#   depends_on = [module.oke, module.nginx, module.cert-manager]
-# }
-
-
 module "crossplane" {
   count  = var.deploy_crossplane ? 1 : 0
   source = "./helm-module"
@@ -159,12 +25,6 @@ module "crossplane" {
 
   deploy_from_operator = local.deploy_from_operator
   deploy_from_local    = local.deploy_from_local
-
-# helm repo add crossplane-stable https://charts.crossplane.io/stable
-# helm repo update
-# helm install crossplane \
-# --namespace crossplane-system \
-# --create-namespace crossplane-stable/crossplane 
 
   deployment_name     = "crossplane"
   helm_chart_name     = "crossplane"
@@ -204,13 +64,12 @@ module "crossplane" {
     "make build.all",
     "make generate",
     "kubectl apply -f package/crds",
-    "nohup make run > /home/opc/make_run.log 2>&1 &", ###aici sa pun /home/opc
+    "nohup make run > /home/opc/make_run.log 2>&1 &",
     "cd ./_output/xpkg/linux_amd64",
     "docker login ${lower(data.oci_identity_region_subscriptions.test_region_subscriptions.region_subscriptions[0].region_key)}.ocir.io -u '${var.ocir_username}' -p '${var.ocir_auth_token}'", #'ocisateam/oracleidentitycloudservice/ionut.sturzu@oracle.com' -p 'x9BLa)6>{1TcFto7i-AH'", #user si token aici poate gasec
     "crossplane xpkg push -f ./* ${lower(data.oci_identity_region_subscriptions.test_region_subscriptions.region_subscriptions[0].region_key)}.ocir.io/${oci_artifacts_container_repository.test_container_repository.namespace}/${oci_artifacts_container_repository.test_container_repository.display_name}:latest",
     "mkdir ~/crossplane_yamls",
     "cd ~/crossplane_yamls",
-    # la fel si aici in legatura cu user si parola + namespace
     "kubectl create secret docker-registry ocirauth --namespace default --docker-server=${lower(data.oci_identity_region_subscriptions.test_region_subscriptions.region_subscriptions[0].region_key)}.ocir.io --docker-username='${var.ocir_username}' --docker-password='${var.ocir_auth_token}'",
   ]
 
